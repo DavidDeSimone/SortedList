@@ -11,7 +11,7 @@
  */
 struct SortedList
 {
-  void *list;
+  void **list;
   int size;
   int (*CompareT)(*void, *void);
   void (*DestructT)(*void);
