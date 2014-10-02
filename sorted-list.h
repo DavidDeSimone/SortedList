@@ -162,4 +162,12 @@ void * SLGetItem( SortedListIteratorPtr iter );
 
 void * SLNextItem(SortedListIteratorPtr iter);
 
+
+
+/*
+ * Inserts the given object into the current position marked by
+ * the iterators current position field
+ */
+void insertAt(SortedListPtr list, SortedListIteratorPtr iter, void *newObj);
+
 #endif
