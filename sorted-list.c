@@ -1,15 +1,14 @@
 #include <stdio.h>
+#include <string.h>
 #include "sorted-list.h"
 
-SortedListPtr SLCreate(CompareFunT cf, DestructFunT df) {
+SortedListPtr SLCreate(CompareFuncT cf, DestructFuncT df) {
 
   SortedListPtr ls = malloc(sizeof(SortedListPtr));
   ls->list = NULL;
   ls->size = 0;
-  ls->CompareT = &cf;
-  ls->DestructT = &df;
-
-
+  ls->CompareT = cf;
+  ls->DestructT = df;
 
   return ls;
 }
@@ -32,7 +31,7 @@ int SLInsert(SortedListPtr list, void *newObj) {
   SortedListIteratorPtr slip = SLCreateIterator(list);
   
   if(newObj == NULL) {
-    SLDestroyIterator(slip);
+    //SLDestroyIterator(slip);
     return 0;
   }
 
@@ -43,15 +42,21 @@ int SLInsert(SortedListPtr list, void *newObj) {
     list->list = malloc(sizeof(void*));
     list->list[0] = newObj;
     list->size = 1;
-    SLDestroyIterator(slip);
+    //SLDestroyIterator(slip);
     return 1;
   }
 
   void *next = NULL;
-  while((next = SLNextItem) != NULL) {
-    if(list->CompareT(newObj, next) == 1) {
+
+  printf("Looping\n");
+  while((next = SLNextItem(slip)) != NULL) {
+    printf("Inner\n");
+    if(list->CompareT(newObj, next) == -1) {
+      continue;
+      printf("Not at Fault\n");
+    } else {
+      printf("Nope!\n");
       insertAt(list, slip, newObj);
-      SLDestroyIterator(slip);
       return 1;
     }
   }
@@ -59,7 +64,7 @@ int SLInsert(SortedListPtr list, void *newObj) {
 
   
 
-  SLDestroyIterator(slip);
+  //SLDestroyIterator(slip);
   return 0;
 }
 
@@ -71,20 +76,23 @@ void insertAt(SortedListPtr list, SortedListIteratorPtr iter, void *newObj) {
   //the suffix poriton of the buffer.
   int i, j;
   void **buffer = malloc(list->size + 1);
+  list->size += 1;
+  //Special Case, curr_index = 0
+  
 
 
   for(i = 0; i < iter->curr_index; i++) {
-    buffer[i] = iter->list[i];
+    buffer[i] = list->list[i];
   }
   buffer[i] = newObj;
   for(j = iter->curr_index + 1; j < list->size + 1; j++) {
-    buffer[j] = iter->list[j - 1];
+    buffer[j] = list->list[j - 1];
   }
 
 
   //Free the current list
-  free(list->list);
-  list->buffer;
+  //free(list->list);
+  list->list = buffer;
 }
 
 
@@ -119,7 +127,7 @@ SortedListIteratorPtr SLCreateIterator(SortedListPtr list) {
   slip->first = first;
 
   slip->next = NULL;
-  slip->curr_index = 0;
+  slip->curr_index = -1;
 
 
 
@@ -139,9 +147,72 @@ void* SLNextItem(SortedListIteratorPtr iter) {
     return NULL;
   }
 
-  void *next = iter->listPtr->list[curr_index];
+  void *next = iter->listPtr->list[curr_index + 1];
   iter->curr_index += 1;
   iter->next = next;
 
   return iter->next;
+}
+
+void SLDestroyIterator(SortedListIteratorPtr iter) {
+  //TODO Free other stuffs
+  free(iter);
+
+}
+
+//Debug Testing
+
+int compareInts(void *p1, void *p2)
+{
+  int i1 = *(int*)p1;
+  int i2 = *(int*)p2;
+
+  return i1 - i2;
+}
+
+int compareDoubles(void *p1, void *p2)
+{
+  double d1 = *(double*)p1;
+  double d2 = *(double*)p2;
+
+  return (d1 < d2) ? -1 : ((d1 > d2) ? 1 : 0);
+}
+
+int compareStrings(void *p1, void *p2)
+{
+  char *s1 = p1;
+  char *s2 = p2;
+
+  return strcmp(s1, s2);
+}
+
+//Destructor functions
+void destroyBasicTypeAlloc(void *p){
+  //For pointers to basic data types (int*,char*,double*,...)
+  //Use for allocated memory (malloc,calloc,etc.)
+  free(p);
+}
+
+void destroyBasicTypeNoAlloc(void *p) {
+  //For pointers to basic data types (int*,char*,double*,...)
+  //Use for memory that has not been allocated (e.g., "int x = 5;SLInsert(mylist,&x);SLRemove(mylist,&x);")
+  return;
+}
+
+
+int main()
+{
+  int x = 0;
+  int y = 1;
+  int z = 2;
+
+
+
+  printf("Hello World");
+  SortedListPtr ls = SLCreate(&compareInts, &destroyBasicTypeNoAlloc);
+  SLInsert(ls, &x);
+  SLInsert(ls, &y);
+  SLInsert(ls, &z);
+
+
 }

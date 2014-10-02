@@ -13,8 +13,8 @@ struct SortedList
 {
   void **list;
   int size;
-  int (*CompareT)(*void, *void);
-  void (*DestructT)(*void);
+  int (*CompareT)(void *, void *);
+  void (*DestructT)(void *);
   
 };
 typedef struct SortedList* SortedListPtr;
@@ -169,5 +169,7 @@ void * SLNextItem(SortedListIteratorPtr iter);
  * the iterators current position field
  */
 void insertAt(SortedListPtr list, SortedListIteratorPtr iter, void *newObj);
+
+int compareInts(void *p1, void *p2);
 
 #endif
