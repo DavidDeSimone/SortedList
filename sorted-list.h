@@ -169,6 +169,7 @@ void * SLNextItem(SortedListIteratorPtr iter);
  * the iterators current position field
  */
 void insertAt(SortedListPtr list, SortedListIteratorPtr iter, void *newObj);
+void deleteAt(SortedListPtr list, SortedListIteratorPtr iter);
 
 int compareInts(void *p1, void *p2);
 

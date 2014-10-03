@@ -48,14 +48,10 @@ int SLInsert(SortedListPtr list, void *newObj) {
 
   void *next = NULL;
 
-  printf("Looping\n");
   while((next = SLNextItem(slip)) != NULL) {
-    printf("Inner\n");
     if(list->CompareT(newObj, next) == -1) {
       continue;
-      printf("Not at Fault\n");
     } else {
-      printf("Nope!\n");
       insertAt(list, slip, newObj);
       return 1;
     }
@@ -96,9 +92,69 @@ void insertAt(SortedListPtr list, SortedListIteratorPtr iter, void *newObj) {
 }
 
 
-int SLRemove(SortedListPtr list, void *newObj) {
 
+
+int SLRemove(SortedListPtr list, void *newObj) {
+  SortedListIteratorPtr slip = SLCreateIterator(list);
+
+
+  if(newObj == NULL) {
+    //SLDestroyIterator(slip);
+    return 0;
+  }
+
+
+  //If the list is empty, there is nothing to delete
+  //Just return 0
+  if(list->size == 0) {
+    return 0;
+  }
+
+  void *next = NULL;
+
+  //Loop through the list, if we find our item
+  //Call the deletion function
+  while((next = SLNextItem(slip)) != NULL) {
+    if(list->CompareT(newObj, next) == 0) {
+      deleteAt(list, slip);
+      return 1;
+    }
+  }
+
+
+  
+
+  //SLDestroyIterator(slip);
   return 0;
+}
+
+
+//Deletes the object pointed at by the SortedListIterators current position
+void deleteAt(SortedListPtr list, SortedListIteratorPtr iter) {
+  int i, j;
+  if(list->size == 1) {
+    list->list = NULL;
+    return;
+  }
+  
+  void **buffer = malloc(list->size - 1);
+  list->size -= 1;
+
+  printf("%d\n", list->size);
+  printf("%d\n", iter->curr_index);
+
+  for(i = 0; i < iter->curr_index; i++) {
+    buffer[i] = list->list[i];
+  }
+  for(j = iter->curr_index + 1; j < list->size + 1; j++) {
+    printf("j: %d\n", j - 1);
+    buffer[j - 1] = list->list[j];
+  }
+
+  //Free the current list
+  //free(list->list);
+
+  list->list = buffer;
 }
 
 /* Creates a SortedListIterator for the given SortedListPtr
@@ -206,13 +262,17 @@ int main()
   int y = 1;
   int z = 2;
 
-
-
-  printf("Hello World");
   SortedListPtr ls = SLCreate(&compareInts, &destroyBasicTypeNoAlloc);
   SLInsert(ls, &x);
   SLInsert(ls, &y);
   SLInsert(ls, &z);
 
+  SLRemove(ls, &z);
 
+  
+  int* first = (int*)ls->list[0];
+  int pr = *first;
+
+  printf("%d\n", pr);
+  
 }
