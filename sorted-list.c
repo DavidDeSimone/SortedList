@@ -4,7 +4,7 @@
 
 SortedListPtr SLCreate(CompareFuncT cf, DestructFuncT df) {
 
-  SortedListPtr ls = malloc(sizeof(SortedListPtr));
+  SortedListPtr ls = malloc(sizeof(struct SortedList));
   ls->list = NULL;
   ls->size = 0;
   ls->CompareT = cf;
@@ -31,7 +31,7 @@ int SLInsert(SortedListPtr list, void *newObj) {
   SortedListIteratorPtr slip = SLCreateIterator(list);
   
   if(newObj == NULL) {
-    //SLDestroyIterator(slip);
+    SLDestroyIterator(slip);
     return 0;
   }
 
@@ -42,7 +42,7 @@ int SLInsert(SortedListPtr list, void *newObj) {
     list->list = malloc(sizeof(void*));
     list->list[0] = newObj;
     list->size = 1;
-    //SLDestroyIterator(slip);
+    SLDestroyIterator(slip);
     return 1;
   }
 
@@ -60,7 +60,7 @@ int SLInsert(SortedListPtr list, void *newObj) {
 
   
 
-  //SLDestroyIterator(slip);
+  SLDestroyIterator(slip);
   return 0;
 }
 
@@ -81,11 +81,11 @@ void insertAt(SortedListPtr list, SortedListIteratorPtr iter, void *newObj) {
     buffer[i] = list->list[i];
   }
   buffer[i] = newObj;
-  for(j = iter->curr_index + 1; j < list->size + 1; j++) {
+  for(j = iter->curr_index + 1; j < list->size - 1; j++) {
     buffer[j] = list->list[j - 1];
   }
 
-
+  printf("size %d", list->size);
   //Free the current list
   //free(list->list);
   list->list = buffer;
@@ -131,19 +131,19 @@ int SLRemove(SortedListPtr list, void *newObj) {
 
 //Deletes the object pointed at by the SortedListIterators current position
 void deleteAt(SortedListPtr list, SortedListIteratorPtr iter) {
-  int i, j;
+  int i = 0;
+  int j = iter->curr_index + 1;
   if(list->size == 1) {
     list->list = NULL;
+    list->size = 0;
     return;
   }
   
   void **buffer = malloc(list->size - 1);
   list->size -= 1;
 
-  printf("%d\n", list->size);
-  printf("%d\n", iter->curr_index);
-
   for(i = 0; i < iter->curr_index; i++) {
+    printf("pre %d, %d\n", i, iter->curr_index);
     buffer[i] = list->list[i];
   }
   for(j = iter->curr_index + 1; j < list->size + 1; j++) {
@@ -169,7 +169,7 @@ void deleteAt(SortedListPtr list, SortedListIteratorPtr iter) {
 
 SortedListIteratorPtr SLCreateIterator(SortedListPtr list) {
   
-  SortedListIteratorPtr slip = malloc(sizeof(SortedListIteratorPtr));
+  SortedListIteratorPtr slip = malloc(sizeof(struct SortedListIterator));
   
   slip->listPtr = list;
   
@@ -204,7 +204,7 @@ void* SLNextItem(SortedListIteratorPtr iter) {
   }
 
   void *next = iter->listPtr->list[curr_index + 1];
-  iter->curr_index += 1;
+  iter->curr_index = iter->curr_index + 1;
   iter->next = next;
 
   return iter->next;
@@ -258,21 +258,27 @@ void destroyBasicTypeNoAlloc(void *p) {
 
 int main()
 {
+  int i;
+
   int x = 0;
   int y = 1;
   int z = 2;
+  int w = 5;
+
 
   SortedListPtr ls = SLCreate(&compareInts, &destroyBasicTypeNoAlloc);
   SLInsert(ls, &x);
   SLInsert(ls, &y);
+  SLInsert(ls, &w);
   SLInsert(ls, &z);
 
   SLRemove(ls, &z);
 
   
-  int* first = (int*)ls->list[0];
+  for(i = 0; i < 3; i++) {
+  int* first = (int*)ls->list[i];
   int pr = *first;
 
-  printf("%d\n", pr);
-  
+  printf("I: %d\n", pr);
+  }
 }
